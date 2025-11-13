@@ -197,13 +197,13 @@ async function run() {
     // ----------------------------
 
     //  Search cars by name (public)
-    app.get('/search', async (req, res) => {
-      const query = req.query.q || '';
-      const cars = await carsCollection
-        .find({ name: { $regex: query, $options: 'i' } })
-        .toArray();
-      res.send(cars);
-    });
+    // app.get('/search', async (req, res) => {
+    //   const query = req.query.q || '';
+    //   const cars = await carsCollection
+    //     .find({ name: { $regex: query, $options: 'i' } })
+    //     .toArray();
+    //   res.send(cars);
+    // });
 
 
 
