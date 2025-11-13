@@ -9,12 +9,12 @@ const jwt = require('jsonwebtoken'); // for authentication
 const app = express();
 const port = process.env.PORT || 3000;
 
-// 🔒 Middleware setup
+// Middleware setup
 app.use(cors());
 app.use(express.json());
 app.use(helmet());
 
-// 🗄️ MongoDB setup
+// MongoDB setup
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_CLUSTER}/?appName=RentWheels`;
 const client = new MongoClient(uri, {
   serverApi: {
@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
   },
 });
 
-// 🔑 Verify JWT middleware
+//  Verify JWT middleware
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).send({ message: 'Unauthorized access' });
@@ -49,7 +49,7 @@ async function run() {
     console.log('✅ MongoDB Connected Successfully!');
 
     // ----------------------------
-    // 🔹 AUTHENTICATION
+    //  AUTHENTICATION
     // ----------------------------
 
     // Generate JWT Token
@@ -60,7 +60,7 @@ async function run() {
     });
 
     // ----------------------------
-    // 🔹 USERS
+    //  USERS
     // ----------------------------
 
     // Save user info after signup/login
@@ -79,30 +79,30 @@ async function run() {
     });
 
     // ----------------------------
-    // 🔹 CARS CRUD
+    // CARS CRUD
     // ----------------------------
 
-    // ➕ Add a new car (Private)
+    //  Add a new car (Private)
     app.post('/cars', verifyJWT, async (req, res) => {
       const car = req.body;
       const result = await carsCollection.insertOne(car);
       res.send(result);
     });
 
-    // 🔍 Get all cars (Public)
+    //  Get all cars (Public)
     app.get('/cars', async (req, res) => {
       const cars = await carsCollection.find().sort({ _id: -1 }).limit(6).toArray();
       res.send(cars);
     });
 
-    // // 🔍 Get single car details
+    //  Get single car details
     app.get('/cars/:id', async (req, res) => {
       const id = req.params.id;
       const car = await carsCollection.findOne({ _id: new ObjectId(id) });
       res.send(car);
     });
 
-    // 🧍‍♀️ My Listings (Private)
+    //  My Listings (Private)
     app.get('/my-listings', verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (req.decoded.email !== email) return res.status(403).send({ message: 'Forbidden access' });
@@ -110,7 +110,7 @@ async function run() {
       res.send(result);
     });
 
-    // ✏️ Update car (Private)
+    //  Update car (Private)
     app.put('/cars/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const updatedCar = req.body;
@@ -121,17 +121,17 @@ async function run() {
       res.send(result);
     });
 
-    // ❌ Delete car (Private)
+    //  Delete car (Private)
     app.delete('/cars/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const result = await carsCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
     });
      // ----------------------------
-    // 🔹 BOOKINGS
+    //  BOOKINGS
     // ----------------------------
 
-    // 📦 Book a car (Private)
+    //  Book a car (Private)
     app.post('/my-bookings', verifyJWT, async (req, res) => {
       const booking = req.body;
       booking.userEmail = req.decoded.email;
@@ -152,14 +152,14 @@ async function run() {
       res.send({ _id: bookingResult.insertedId, ...booking });
     });
 
-    // 🔍 My Bookings (Private)
+    //  My Bookings (Private)
     app.get('/bookings', verifyJWT, async (req, res) => {
       const email = req.decoded.email;
       // if (req.decoded.email !== email) return res.status(403).send({ message: 'Forbidden access' });
       const result = await bookingsCollection.find({ userEmail: email }).toArray();
       res.send(result);
     });
-    // ❌ Cancel a booking (Private)
+    //  Cancel a booking (Private)
     app.delete('/bookings/:id', verifyJWT, async (req, res) => {
    try {
     const id = req.params.id;
@@ -187,16 +187,16 @@ async function run() {
 
     res.send(result);
   } catch (error) {
-    console.error("❌ DELETE /bookings/:id error:", error);
+    console.error(" DELETE /bookings/:id error:", error);
     res.status(500).send({ message: "Server error" });
   }
 });
 
     // ----------------------------
-    // 🔹 EXTRA ROUTES
+    //  EXTRA ROUTES
     // ----------------------------
 
-    // 🔍 Search cars by name (public)
+    //  Search cars by name (public)
     app.get('/search', async (req, res) => {
       const query = req.query.q || '';
       const cars = await carsCollection
