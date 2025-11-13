@@ -95,12 +95,12 @@ async function run() {
       res.send(cars);
     });
 
-    // 🔍 Get single car details
-    app.get('/cars/:id', async (req, res) => {
-      const id = req.params.id;
-      const car = await carsCollection.findOne({ _id: new ObjectId(id) });
-      res.send(car);
-    });
+    // // 🔍 Get single car details
+    // app.get('/cars/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const car = await carsCollection.findOne({ _id: new ObjectId(id) });
+    //   res.send(car);
+    // });
 
     // 🧍‍♀️ My Listings (Private)
     app.get('/my-listings', verifyJWT, async (req, res) => {
