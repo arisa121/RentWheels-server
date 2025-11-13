@@ -1,4 +1,4 @@
-// index.js
+
 require('dotenv').config();
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -132,8 +132,9 @@ async function run() {
     // ----------------------------
 
     // 📦 Book a car (Private)
-    app.post('/bookings', verifyJWT, async (req, res) => {
+    app.post('/my-bookings', verifyJWT, async (req, res) => {
       const booking = req.body;
+      booking.userEmail = req.decoded.email;
 
       // prevent double booking
       const existingBooking = await bookingsCollection.findOne({
@@ -148,16 +149,48 @@ async function run() {
         { _id: new ObjectId(booking.carId) },
         { $set: { status: 'Booked' } }
       );
-      res.send(bookingResult);
+      res.send({ _id: bookingResult.insertedId, ...booking });
     });
 
     // 🔍 My Bookings (Private)
     app.get('/bookings', verifyJWT, async (req, res) => {
-      const email = req.query.email;
-      if (req.decoded.email !== email) return res.status(403).send({ message: 'Forbidden access' });
+      const email = req.decoded.email;
+      // if (req.decoded.email !== email) return res.status(403).send({ message: 'Forbidden access' });
       const result = await bookingsCollection.find({ userEmail: email }).toArray();
       res.send(result);
     });
+    // ❌ Cancel a booking (Private)
+    app.delete('/bookings/:id', verifyJWT, async (req, res) => {
+   try {
+    const id = req.params.id;
+    const email = req.decoded.email;
+
+    // Find the booking first
+    const booking = await bookingsCollection.findOne({ _id: new ObjectId(id) });
+    if (!booking)
+      return res.status(404).send({ message: "Booking not found" });
+
+    // Ensure the booking belongs to the logged-in user
+    if (booking.userEmail !== email)
+      return res.status(403).send({ message: "Forbidden access" });
+
+    // Delete booking
+    const result = await bookingsCollection.deleteOne({ _id: new ObjectId(id) });
+
+    // Update car status if booking was deleted
+    if (result.deletedCount > 0 && booking.carId) {
+      await carsCollection.updateOne(
+        { _id: new ObjectId(booking.carId) },
+        { $set: { status: "Available" } }
+      );
+    }
+
+    res.send(result);
+  } catch (error) {
+    console.error("❌ DELETE /bookings/:id error:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+});
 
     // ----------------------------
     // 🔹 EXTRA ROUTES
@@ -176,10 +209,10 @@ async function run() {
 
     // Root route
     app.get('/', (req, res) => {
-      res.send('🚗 RentWheels Server is Running Perfectly...');
+      res.send('RentWheels Server is Running Perfectly...');
     });
   } catch (err) {
-    console.error('❌ Error:', err);
+    console.error('Error:', err);
   }
 }
    
@@ -187,5 +220,5 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, () => {
-  console.log(`🚀 RentWheels server running on port ${port}`);
+  console.log(`RentWheels server running on port ${port}`);
 });
