@@ -216,6 +216,7 @@ async function run() {
 
 run().catch(console.dir);
 
-app.listen(port, () => {
-  console.log(`RentWheels server running on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`RentWheels server running on port ${port}`);
+// });
+module.exports = app;
