@@ -4,7 +4,7 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const helmet = require('helmet');
-const jwt = require('jsonwebtoken'); // for authentication
+const jwt = require('jsonwebtoken'); 
 
 const app = express();
 const port = process.env.PORT || 3000;
